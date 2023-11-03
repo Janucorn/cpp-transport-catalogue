@@ -11,9 +11,9 @@ namespace transport_ctg {
 namespace input {
 namespace detail{
 
-std::string ReadLine();
+std::string ReadLine(std::istream& in);
 
-int ReadLineWithNumber();
+int ReadLineWithNumber(std::istream& in);
 
 struct Query {
 	std::string type;
@@ -27,14 +27,14 @@ Query QueryType(std::string& text);
 std::string_view CreateName(std::string_view& text);
 
 // считывание запросов
-std::vector<detail::Query> SetQueryBase();
+std::vector<detail::Query> SetQueryBase(std::istream& in);
 } // end of namespace "transport_ctg::input::detail
 
 class Reader {
 public:
 	explicit Reader();
 	// создание каталога
-	void SetCatalogue();
+	void SetCatalogue(std::istream& in);
 	// возвращает ссылку на каталог
 	Catalogue& GetCatalogue();
 

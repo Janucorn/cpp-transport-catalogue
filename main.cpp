@@ -13,6 +13,6 @@ int main() {
 	input::Reader input_reader;
 	statreader::StatReader stat_reader(input_reader);
 
-	input_reader.SetCatalogue();
-	stat_reader.PrintInfo();
+	input_reader.SetCatalogue(std::cin);
+	stat_reader.PrintInfo(std::cout, std::cin);
 }

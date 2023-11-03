@@ -39,7 +39,7 @@ public:
 	// добавление маршрута в базу
 	// Bus X: stop1>stop2>...>stopN>stop1 (кольцевой маршрут)
 	// Bus X: stop1-stop2-...-stopN (обычный маршрут)
-	void AddBus(std::string_view bus_name, std::vector<Stop*> stops);
+	void AddBus(const std::string_view bus_name, const std::vector<Stop*>& stops);
 
 	// поиск маршрута по имени
 	Bus* FindBus(const std::string_view bus_name) const;

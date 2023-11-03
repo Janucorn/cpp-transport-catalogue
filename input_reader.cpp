@@ -1,6 +1,10 @@
 #include "input_reader.h"
 #include "transport_catalogue.h"
-#include <cassert>
+
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace transport_ctg {
 
@@ -8,16 +12,16 @@ using namespace std::literals;
 namespace input {
 namespace detail {
 
-std::string ReadLine() {
+std::string ReadLine(std::istream& in) {
 	std::string str;
-	std::getline(std::cin, str);
+	std::getline(in, str);
 	return str;
 }
 
-int ReadLineWithNumber() {
+int ReadLineWithNumber(std::istream& in) {
 	int result;
-	std::cin >> result;
-	ReadLine();
+	in >> result;
+	ReadLine(in);
 	return result;
 }
 
@@ -53,14 +57,14 @@ std::string_view CreateName(std::string_view& text) {
 }
 
 // Считываем запросы
-std::vector<detail::Query> SetQueryBase() {
-	int query_count = detail::ReadLineWithNumber();
+std::vector<detail::Query> SetQueryBase(std::istream& in) {
+	int query_count = detail::ReadLineWithNumber(in);
 	std::vector<Query> queries;
 	queries.reserve(query_count);
 
 	// Создаем список запросов и их типов
 	for (int i = 0; i < query_count; ++i) {
-		auto text = ReadLine();
+		auto text = ReadLine(in);
 		queries.push_back(std::move(QueryType(text)));
 	}
 	return queries;
@@ -77,9 +81,9 @@ Catalogue& Reader::GetCatalogue() {
 }
 
  // Создаем каталог
-void Reader::SetCatalogue() {
+void Reader::SetCatalogue(std::istream& in) {
 
-	queries_ = std::move(detail::SetQueryBase());
+	queries_ = std::move(detail::SetQueryBase(in));
 
 	// добавляем остановки в базу
 	for (const auto& query : queries_) {
@@ -245,7 +249,6 @@ Bus Reader::CreateBusBase(const std::string_view query_text) {
 	catalogue_.AddBus(bus.name, bus.stops_ptr);
 	return bus;
 }// конец обрабатки маршрута
-
 
 } // end of namespace "transport_ctg::input
 } // end of namespace "transport_ctg"

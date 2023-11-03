@@ -23,7 +23,7 @@ Stop* Catalogue::FindStop(const std::string_view stop_name) const {
 	return stopname_to_stop_.at(stop_name);
 }
 
-void Catalogue::AddBus(const std::string_view bus_name, std::vector<Stop*> stops) {
+void Catalogue::AddBus(const std::string_view bus_name, const std::vector<Stop*>& stops) {
 	buses_.push_back({ bus_name, stops });
 
 	for (const auto& stop : stops) {
@@ -99,9 +99,8 @@ void Catalogue::AddDistanceBetweenStops(const std::pair<Stop*, Stop*> stops, con
 
 uint32_t Catalogue::GetDistanceBetweenStops(const std::pair<Stop*, Stop*> stops) const {
 	HasherStops hasher;
-	// Ищем остановки A - B
+	// ищем остановки в обратном поярдке B - A
 	if (!stop_distance_.count(hasher(stops))) {
-		// ищем остановки в обратном поярдке B - A
 		// возвращаем 0, если не задано расстояние
 		if (!stop_distance_.count(hasher({ stops.second, stops.first }))) {
 			return 0;
@@ -109,7 +108,7 @@ uint32_t Catalogue::GetDistanceBetweenStops(const std::pair<Stop*, Stop*> stops)
 		else {
 			return stop_distance_.at(hasher({ stops.second, stops.first }));
 		}
-	}
+	}// Ищем остановки A - B
 	else {
 		return stop_distance_.at(hasher(stops));
 	}
