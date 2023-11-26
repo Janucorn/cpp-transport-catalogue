@@ -3,16 +3,22 @@
 #include <string_view>
 
 #include "transport_catalogue.h"
-#include "input_reader.h"
-#include "stat_reader.h"
+#include "json_reader.h"
+#include "request_handler.h"
+#include "map_renderer.h"
 
 using namespace transport_ctg;
 
 int main() {
+	using namespace std::literals;
 	
-	input::Reader input_reader;
-	statreader::StatReader stat_reader(input_reader);
+	Catalogue catalogue;
+	json::JsonReader requests(std::cin);
 
-	input_reader.SetCatalogue(std::cin);
-	stat_reader.PrintInfo(std::cout, std::cin);
+	requests.AddToCatalogue(catalogue);
+    
+    const auto& settings = requests.GetRenderSettings().AsMap();
+    const auto& map_renderer = requests.SetMapRenderer(settings);
+
+    json::request_handler::RequestHandler(requests, catalogue, map_renderer, std::cout);
 }
