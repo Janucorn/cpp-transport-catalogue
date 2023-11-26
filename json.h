@@ -41,6 +41,7 @@ namespace json {
         bool IsArray() const;
         bool IsMap() const;
 
+
         int AsInt() const;
         bool AsBool() const;
         double AsDouble() const;
@@ -49,6 +50,8 @@ namespace json {
         const Dict& AsMap() const;
 
         const Value& GetValue() const;
+
+        Value& GetValue();
 
         bool operator==(const Node& other) const;
         bool operator!=(const Node& other) const;

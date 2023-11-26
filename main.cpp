@@ -4,6 +4,7 @@
 
 #include "transport_catalogue.h"
 #include "json_reader.h"
+#include "json_builder.h"
 #include "request_handler.h"
 #include "map_renderer.h"
 

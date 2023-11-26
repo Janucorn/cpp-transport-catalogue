@@ -80,40 +80,60 @@ void RequestHandler::PrintInfo(std::ostream& out) const {
 }
 
 const Node RequestHandler::PrintStop(const Dict& query) const {
-	Dict result;
+	Node result;
 	const auto& stopname = query.at("name"s).AsString();
-	result["request_id"s] = query.at("id"s).AsInt();
+	const int id = query.at("id"s).AsInt();
 	const auto& stop_ptr = catalogue_.FindStop(stopname);
 
 	// проверяем есть ли наличие маршрутов проходящих через эту остановку
 	if (!stop_ptr) {
-		result["error_message"s] = "not found"s;
+		result = Builder{}
+			.StartDict()
+                .Key("request_id"s).Value(id)
+			.Key("error_message"s).Value("not found"s)
+			.EndDict()
+			.Build();
 	} else {
 		Array buses;
 		for (const auto& bus : catalogue_.GetBusesForStop(stopname)) {
 			buses.push_back(static_cast<std::string>(bus));
 		}
-		result["buses"s] = buses;
+		result = Builder{}
+			.StartDict()
+			.Key("buses"s).Value(buses)
+			.Key("request_id"s).Value(id)
+			.EndDict()
+			.Build();
 	}
-	return Node{ result };
+	return  result;
 }
 
 const Node RequestHandler::PrintRoute(const Dict& query) const {
-	Dict result;
-	result["request_id"s] = query.at("id").AsInt();
-	const auto& busname = query.at("name").AsString();
+	Node result;
+	const int id = query.at("id"s).AsInt();
+	const auto& busname = query.at("name"s).AsString();
 	const auto& bus_ptr = catalogue_.FindBus(busname);
 
 	if (!bus_ptr) {
-		result["error_message"s] = "not found"s;
+		result = Builder{}
+			.StartDict()
+			.Key("request_id"s).Value(id)
+			.Key("error_message"s).Value("not found"s)
+			.EndDict()
+			.Build();
 	} else {
 		const auto& bus_info = catalogue_.GetBusInfo(busname);
-		result["curvature"s] = bus_info.route_length / bus_info.coordinate_length;
-		result["route_length"s] = bus_info.route_length;
-		result["stop_count"] = bus_info.stops_on_route;
-		result["unique_stop_count"] = bus_info.unique_stops;
+		result = Builder{}
+			.StartDict()
+                .Key("request_id"s).Value(id)
+			.Key("curvature"s).Value(bus_info.route_length / bus_info.coordinate_length)
+			.Key("route_length"s).Value(bus_info.route_length)
+			.Key("stop_count"s).Value(bus_info.stops_on_route)
+			.Key("unique_stop_count"s).Value(bus_info.unique_stops)
+			.EndDict()
+			.Build();
 	}
-	return Node{ result };
+	return result;
 }
 
 void RequestHandler::PrintRenderedMap(std::ostream& out) const {
@@ -123,12 +143,18 @@ void RequestHandler::PrintRenderedMap(std::ostream& out) const {
 }
 
 const Node RequestHandler::PrintMap(const Dict& query) const {
-	Dict result;
+	Node result;
 	std::ostringstream strm(""s);
 	PrintRenderedMap(strm);
-	result["request_id"s] = query.at("id"s).AsInt();
-	result["map"s] = strm.str();
-	return Node{ result };
+	const int id = query.at("id"s).AsInt();
+
+	result = Builder{}
+		.StartDict()
+		.Key("map"s).Value(strm.str())
+		.Key("request_id"s).Value(id)
+		.EndDict()
+		.Build();
+	return result;
 }
 } // namesapce request_handler
 } // namespace json

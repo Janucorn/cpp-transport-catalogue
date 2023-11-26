@@ -347,6 +347,8 @@ namespace json {
 
     const Node::Value& Node::GetValue() const { return value_; }
 
+    Node::Value& Node::GetValue() { return value_; }
+
     Document::Document(Node root)
         : root_(std::move(root)) {
     }

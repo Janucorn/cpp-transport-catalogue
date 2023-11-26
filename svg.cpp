@@ -99,7 +99,7 @@ namespace svg {
 		out << "<text"sv;
 		// выводим атрибуты
 		RenderAttrs(out);
-		out << " x = \""sv << pos_.x << "\" y=\""sv << pos_.y << "\""sv;
+		out << " x=\""sv << pos_.x << "\" y=\""sv << pos_.y << "\""sv;
 		out << " dx=\""sv << offset_.x << "\" dy=\""sv << offset_.y << "\""sv;
 		out << " font-size=\""sv << font_size_ << "\""sv;
 		if (!font_family_.empty()) {

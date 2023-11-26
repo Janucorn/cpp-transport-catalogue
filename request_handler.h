@@ -35,6 +35,7 @@
  };
  */
 #include "json.h"
+#include "json_builder.h"
 #include "json_reader.h"
 #include "transport_catalogue.h"
 
@@ -45,6 +46,8 @@ namespace request_handler {
 
 class RequestHandler {
 public:
+	//explicit RequestHandler(JsonReader& queries, const transport_ctg::Catalogue& catalogue, std::ostream& out);
+	
 	explicit RequestHandler(JsonReader& queries, const transport_ctg::Catalogue& catalogue, const renderer::MapRenderer& renderer, std::ostream& out);
 
 private:

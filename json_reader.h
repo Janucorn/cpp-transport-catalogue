@@ -5,6 +5,7 @@
  * а также код обработки запросов к базе и формирование массива ответов в формате JSON
  */
 #include "json.h"
+#include "json_builder.h"
 #include "transport_catalogue.h"
 #include "map_renderer.h"
 
