@@ -48,12 +48,13 @@ class RequestHandler {
 public:
 	//explicit RequestHandler(JsonReader& queries, const transport_ctg::Catalogue& catalogue, std::ostream& out);
 	
-	explicit RequestHandler(JsonReader& queries, const transport_ctg::Catalogue& catalogue, const renderer::MapRenderer& renderer, std::ostream& out);
+	explicit RequestHandler(JsonReader& queries, const transport_ctg::Catalogue& catalogue, const renderer::MapRenderer& renderer, const transport_ctg::BusRouter& router, std::ostream& out);
 
 private:
 	const JsonReader& queries_;
 	const transport_ctg::Catalogue& catalogue_;
 	const renderer::MapRenderer& renderer_;
+	const transport_ctg::BusRouter& router_;
 
 	// хранит ссылку на выходной поток и выводит ответы по запросам
 	void PrintInfo(std::ostream& out) const;
@@ -63,6 +64,8 @@ private:
 	const Node PrintRoute(const Dict& queryAsMap) const;
 
 	const Node PrintMap(const Dict& queryAsMap) const;
+
+	const Node PrintShortRoute(const Dict& queryAsMap) const;
 
 	// выводит SVG-изображение карты
 	void PrintRenderedMap(std::ostream& out) const;

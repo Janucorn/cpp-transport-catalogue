@@ -41,6 +41,14 @@ const Node& JsonReader::GetRenderSettings() const {
 	return queries_.GetRoot().AsMap().at("render_settings"s);
 }
 
+const Node& JsonReader::GetRoutingSettings() const {
+	if (!queries_.GetRoot().AsMap().count("routing_settings"s)) {
+		static Node empty_node = nullptr;
+		return empty_node;
+	}
+	return queries_.GetRoot().AsMap().at("routing_settings"s);
+}
+
 void JsonReader::AddToCatalogue(transport_ctg::Catalogue& catalogue) {
 	const Array& queries = GetBaseRequest().AsArray();
 	//сначала добавляем все остановки в базу
@@ -198,4 +206,14 @@ renderer::MapRenderer JsonReader::SetMapRenderer(const Dict& settings) const {
 	renderer::RenderSettings render_settings = SetRenderSettings(settings);
 	return { render_settings };
 }
+
+transport_ctg::BusRouter JsonReader::SetRouter(const Dict& settings, const transport_ctg::Catalogue& catalogue) const {
+	if (&GetRoutingSettings() == nullptr) {
+		throw std::invalid_argument("Routing_settings is doesn't exist"s);
+	}
+	return transport_ctg::BusRouter({
+	settings.at("bus_wait_time"s).AsInt(),
+	settings.at("bus_velocity"s).AsDouble()}, catalogue);
+}
+
 } // namespace json

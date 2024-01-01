@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "transport_catalogue.h"
+#include "transport_router.h"
 #include "json_reader.h"
 #include "json_builder.h"
 #include "request_handler.h"
@@ -20,6 +21,8 @@ int main() {
     
     const auto& settings = requests.GetRenderSettings().AsMap();
     const auto& map_renderer = requests.SetMapRenderer(settings);
-
-    json::request_handler::RequestHandler(requests, catalogue, map_renderer, std::cout);
+    const auto& route_settings = requests.GetRoutingSettings().AsMap();
+    const auto& router = requests.SetRouter(route_settings, catalogue);
+    
+    json::request_handler::RequestHandler(requests, catalogue, map_renderer, router, std::cout);
 }

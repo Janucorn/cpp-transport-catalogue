@@ -45,11 +45,13 @@ namespace request_handler{
 
 using namespace std::literals;
 
-RequestHandler::RequestHandler(JsonReader& queries, const transport_ctg::Catalogue& catalogue, const renderer::MapRenderer& renderer, std::ostream& out)
+RequestHandler::RequestHandler(JsonReader& queries, const transport_ctg::Catalogue& catalogue, const renderer::MapRenderer& renderer, const transport_ctg::BusRouter& router, std::ostream& out)
 	: queries_(queries)
 	, catalogue_(catalogue)
-	, renderer_(renderer) {
+	, renderer_(renderer)
+	, router_(router) {
 	PrintInfo(out);
+	//PrintRenderedMap(out);
 	out << std::endl;
 }
 
@@ -74,9 +76,12 @@ void RequestHandler::PrintInfo(std::ostream& out) const {
 		if (type == "Map") {
 			result.push_back(PrintMap(query.AsMap()));
 		}
+		if (type == "Route"s) {
+			result.push_back(PrintShortRoute(query.AsMap()));
+		}
 	}
 	// выводим результат в выходной поток
-	Print(Document{ result }, out);
+	Print(Document(result), out);
 }
 
 const Node RequestHandler::PrintStop(const Dict& query) const {
@@ -89,7 +94,7 @@ const Node RequestHandler::PrintStop(const Dict& query) const {
 	if (!stop_ptr) {
 		result = Builder{}
 			.StartDict()
-                .Key("request_id"s).Value(id)
+			.Key("request_id"s).Value(id)
 			.Key("error_message"s).Value("not found"s)
 			.EndDict()
 			.Build();
@@ -125,7 +130,7 @@ const Node RequestHandler::PrintRoute(const Dict& query) const {
 		const auto& bus_info = catalogue_.GetBusInfo(busname);
 		result = Builder{}
 			.StartDict()
-                .Key("request_id"s).Value(id)
+			.Key("request_id"s).Value(id)
 			.Key("curvature"s).Value(bus_info.route_length / bus_info.coordinate_length)
 			.Key("route_length"s).Value(bus_info.route_length)
 			.Key("stop_count"s).Value(bus_info.stops_on_route)
@@ -156,5 +161,65 @@ const Node RequestHandler::PrintMap(const Dict& query) const {
 		.Build();
 	return result;
 }
+
+const Node RequestHandler::PrintShortRoute(const Dict& query) const {
+	Node result;
+	const int id = query.at("id"s).AsInt();
+	const auto& from = query.at("from"s).AsString();
+	const auto& to = query.at("to"s).AsString();
+	const auto& stop_from = catalogue_.FindStop(from);
+	const auto& stop_to = catalogue_.FindStop(to);
+
+	const auto& router = router_.FindRoute(stop_from, stop_to);
+	
+	if (!router) {
+		result = json::Builder{}
+			.StartDict()
+			.Key("request_id"s).Value(id)
+			.Key("error_message"s).Value("not found"s)
+			.EndDict()
+			.Build();
+	} else {
+		json::Array items;
+		double total_time = 0.0;
+
+		items.reserve(router.value().edges.size());
+		for (auto& edge_id : router.value().edges) {
+			const graph::Edge<double> edge = router_.GetGraph().GetEdge(edge_id);
+			if (edge.quality == 0) {
+				items.emplace_back(json::Builder{}
+					.StartDict()
+					.Key("stop_name"s).Value(edge.name)
+					.Key("time"s).Value(edge.weight)
+					.Key("type"s).Value("Wait"s)
+					.EndDict()
+					.Build());
+
+				total_time += edge.weight;
+			} else {
+				items.emplace_back(json::Builder{}
+				.StartDict()
+					.Key("bus"s).Value(edge.name)
+					.Key("span_count"s).Value(static_cast<int>(edge.quality))
+					.Key("time"s).Value(edge.weight)
+					.Key("type"s).Value("Bus"s)
+					.EndDict()
+					.Build()
+				);
+
+				total_time += edge.weight;
+			}
+		}
+		result = json::Builder{}
+			.StartDict()
+			.Key("request_id"s).Value(id)
+			.Key("total_time"s).Value(total_time)
+			.Key("items"s).Value(items)
+			.EndDict()
+			.Build();
+	}
+	return result;
+}
+
 } // namesapce request_handler
 } // namespace json
